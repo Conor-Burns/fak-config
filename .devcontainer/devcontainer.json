@@ -1,10 +1,17 @@
 {
-    "image": "jmgilman/dev-container",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/nix:1": {
+            "multiUser": true,
+            "extraNixConfig": "experimental-features = nix-command flakes"
+        }
+    },
     "mounts": [
         "source=nix-store,target=/nix,type=volume",
         "source=vs-exts,target=/home/vscode/.vscode-server/extensions,type=volume",
         "source=vs-exts-in,target=/home/vscode/.vscode-server-insiders/extensions,type=volume"
     ],
+    "postCreateCommand": "nix develop .#container --command echo 'Nix store ready'",
     "remoteUser": "vscode",
     "customizations": {
         "vscode": {
@@ -12,10 +19,11 @@
                 "Tweag.vscode-nickel"
             ],
             "settings": {
-                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.defaultProfile.linux": "nix-develop",
                 "terminal.integrated.profiles.linux": {
-                    "zsh": {
-                        "path": "/home/vscode/.nix-profile/bin/zsh"
+                    "nix-develop": {
+                        "path": "/bin/bash",
+                        "args": ["-c", "exec nix develop $CODESPACE_VSCODE_FOLDER#container"]
                     }
                 }
             }
